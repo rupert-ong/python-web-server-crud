@@ -25,8 +25,40 @@ class webserverHandler(BaseHTTPRequestHandler):
                 print output
                 return
 
+            if self.path.endswith("/restaurants/new"):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                # Output form to create new restaurant
+                output = createNewRestaurantForm()
+                self.wfile.write(output)
+                print output
+                return
+
         except IOError:
             self.send_error(404, "File not found at %s" % self.path)
+
+    def do_POST(self):
+        try:
+            if self.path.endswith("/restaurants/new"):
+                ctype, pdict = cgi.parse_header(
+                    self.headers.getheader('content-type'))
+
+                if ctype == 'multipart/form-data':
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                    restaurant_name = fields.get('restaurantName')[0]
+                    addRestaurant(restaurant_name)
+
+                self.send_response(301)
+                self.send_header('Content-type', 'text/html')
+                self.send_header('Location', '/restaurants')
+                self.end_headers()
+
+                return
+
+        except:
+            pass
 
 
 def createDBSession():
@@ -51,9 +83,22 @@ def getAllRestaurants():
         output += "<small><a href='#'>Edit</a> | <a href='#'>Delete</a></small>"
         output += "</li>"
 
-    output += "</ul>"
+    output += "</ul><p><a href='/restaurants/new'>Create new restaurant</a></p>"
 
     return output
+
+
+def addRestaurant(restaurant_name):
+    """Add restaurant to database
+
+    Args:
+        restaurant_name: name of restaurant
+
+    """
+    session = createDBSession()
+    restaurant = Restaurant(name=restaurant_name)
+    session.add(restaurant)
+    session.commit()
 
 
 def main():
@@ -82,6 +127,17 @@ def createHTMLPage(content):
     output += content
     output += "</body></html>"
 
+    return output
+
+
+def createNewRestaurantForm():
+    """Create form for new restaurant"""
+    output = ("<form method='POST' enctype='multipart/form-data' "
+              "action='/restaurants/new'>"
+              "<h2>Create a new restaurant</h2>"
+              "<label>Restaurant Name</label>"
+              "<input type='text' name='restaurantName'>"
+              "<input type='submit' value='Submit'></form>")
     return output
 
 if __name__ == '__main__':
