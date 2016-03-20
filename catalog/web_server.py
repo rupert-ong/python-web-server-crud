@@ -47,7 +47,9 @@ def getAllRestaurants():
     output = "<ul>"
 
     for r in restaurants:
-        output += "<li><h3>%s</h3></li>" % r.name
+        output += "<li><h3>%s</h3>" % r.name
+        output += "<small><a href='#'>Edit</a> | <a href='#'>Delete</a></small>"
+        output += "</li>"
 
     output += "</ul>"
 
