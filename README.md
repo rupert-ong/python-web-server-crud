@@ -20,7 +20,7 @@ Here's what you need to do to view this project:
 1. Install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org).
 2. Within Terminal (Mac), navigate to the root directory of this project and launch the Vagrant VM by running the command `vagrant up`.
 3. SSH into the running Vagrant machine `vagrant ssh`. 
-4. Run `cd/catalog` to change directory.
+4. Run `cd/vagrant/catalog` to change directory.
 5. Run `python database_setup.py` to create the database.
 6. Run `python menu_populator.py` to populate it.
 7. Finally, run `python web_server` to start the web server.
