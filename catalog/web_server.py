@@ -47,7 +47,7 @@ def getAllRestaurants():
     output = "<ul>"
 
     for r in restaurants:
-        output += "<li><h3>%s</h3>" % r.name
+        output += "<li><h3 class='margin-b-0'>%s</h3>" % r.name
         output += "<small><a href='#'>Edit</a> | <a href='#'>Delete</a></small>"
         output += "</li>"
 
@@ -76,7 +76,9 @@ def createHTMLPage(content):
         content: String of HTMl elements
 
     """
-    output = "<!doctype html><html><head></head><body>"
+    output = "<!doctype html><html><head>"
+    output += "<style>.margin-b-0 { margin-bottom: 0; }</style>"
+    output += "</head><body>"
     output += content
     output += "</body></html>"
 
