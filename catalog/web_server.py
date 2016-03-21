@@ -1,5 +1,6 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import cgi  # Common Gateway Interface
+import re
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -32,6 +33,19 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 # Output form to create new restaurant
                 output = createNewRestaurantForm()
+                self.wfile.write(output)
+                print output
+                return
+
+            if re.search(r'/restaurants/([0-9]+?)/edit', self.path) is not None:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                # Output form to edit existing restaurant based on id from URL
+                r_id = re.search(
+                    r'/restaurants/([0-9]+?)/edit', self.path).group(1)
+                output = editRestaurantForm(r_id)
                 self.wfile.write(output)
                 print output
                 return
@@ -80,7 +94,9 @@ def getAllRestaurants():
 
     for r in restaurants:
         output += "<li><h3 class='margin-b-0'>%s</h3>" % r.name
-        output += "<small><a href='#'>Edit</a> | <a href='#'>Delete</a></small>"
+        output += "<small>"
+        output += "<a href='/restaurants/%s/edit'>Edit</a> | " % r.id
+        output += "<a href='#'>Delete</a></small>"
         output += "</li>"
 
     output += "</ul><p><a href='/restaurants/new'>Create new restaurant</a></p>"
@@ -138,6 +154,31 @@ def createNewRestaurantForm():
               "<label>Restaurant Name</label>"
               "<input type='text' name='restaurantName'>"
               "<input type='submit' value='Submit'></form>")
+    return output
+
+
+def editRestaurantForm(r_id):
+    """Create form to edit existing restaurant
+
+    Args:
+        r_id: id extracted from URL
+
+    """
+    session = createDBSession()
+    restaurant = session.query(Restaurant).get(r_id)
+
+    if restaurant is None:
+        output = ("<p>The restaurant you're looking for doesn't exist.<br>"
+                  "<a href='/restaurants'>Back to listings</a></p>")
+    else:
+        output = ("<form method='POST' enctype='multipart/form-data' "
+                  "action='/restaurants/%s/edit'>"
+                  "<h2>Edit %s restaurant</h2>"
+                  "<label>Restaurant Name</label>"
+                  "<input type='text' name='restaurantName'>"
+                  "<input type='submit' value='Submit'></form>") % (
+            restaurant.id, restaurant.name)
+
     return output
 
 if __name__ == '__main__':
