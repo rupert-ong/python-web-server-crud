@@ -75,6 +75,19 @@ class webserverHandler(BaseHTTPRequestHandler):
             pass
 
 
+def main():
+    """Instantiate the web server with address and port number"""
+    try:
+        port = 8080
+        server = HTTPServer(('', port), webserverHandler)
+        print "Web server running on port %s" % port
+        server.serve_forever()
+
+    except KeyboardInterrupt:
+        print "^C entered. Stopping web server..."
+        server.socket.close()
+
+
 def createDBSession():
     """Connect to database and return session"""
     engine = create_engine('sqlite:///restaurantmenu.db', echo=True)
@@ -83,6 +96,19 @@ def createDBSession():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     return session
+
+
+def addRestaurant(restaurant_name):
+    """Add restaurant to database
+
+    Args:
+        restaurant_name: name of restaurant
+
+    """
+    session = createDBSession()
+    restaurant = Restaurant(name=restaurant_name)
+    session.add(restaurant)
+    session.commit()
 
 
 def getAllRestaurants():
@@ -102,32 +128,6 @@ def getAllRestaurants():
     output += "</ul><p><a href='/restaurants/new'>Create new restaurant</a></p>"
 
     return output
-
-
-def addRestaurant(restaurant_name):
-    """Add restaurant to database
-
-    Args:
-        restaurant_name: name of restaurant
-
-    """
-    session = createDBSession()
-    restaurant = Restaurant(name=restaurant_name)
-    session.add(restaurant)
-    session.commit()
-
-
-def main():
-    """Instantiate the web server with address and port number"""
-    try:
-        port = 8080
-        server = HTTPServer(('', port), webserverHandler)
-        print "Web server running on port %s" % port
-        server.serve_forever()
-
-    except KeyboardInterrupt:
-        print "^C entered. Stopping web server..."
-        server.socket.close()
 
 
 def createHTMLPage(content):
