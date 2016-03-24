@@ -70,8 +70,8 @@ class webserverHandler(BaseHTTPRequestHandler):
                     restaurant_name = fields.get('restaurantName')[0]
                     addRestaurant(restaurant_name)
 
-                self.send_post_response()
-                return
+                    self.send_post_response()
+                    return
 
             if re.search(
                     self.PATTERN_EDIT_RESTAURANT_PATH, self.path) is not None:
@@ -85,17 +85,12 @@ class webserverHandler(BaseHTTPRequestHandler):
                         self.PATTERN_EDIT_RESTAURANT_PATH, self.path).group(1)
                     editRestaurant(r_id, r_name)
 
-                self.send_post_response()
-                return
+                    self.send_post_response()
+                    return
 
             if self.path.endswith("/delete"):
-                ctype, pdict = cgi.parse_header(
-                    self.headers.getheader('content-type'))
-
-                if ctype == 'multipart/form-data':
-                    fields = cgi.parse_multipart(self.rfile, pdict)
-                    r_id = fields.get('restaurantID')[0]
-                    deleteRestaurant(r_id)
+                r_id = self.path.split("/")[2]
+                deleteRestaurant(r_id)
 
                 self.send_post_response()
                 return
