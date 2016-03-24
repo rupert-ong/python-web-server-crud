@@ -17,9 +17,7 @@ class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             if self.path.endswith("/restaurants"):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                self.send_get_response()
 
                 # Output all restaurants
                 restaurant_list = getAllRestaurants()
@@ -30,9 +28,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 return
 
             if self.path.endswith("/restaurants/new"):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                self.send_get_response()
 
                 # Output form to create new restaurant
                 output = createNewRestaurantForm()
@@ -42,9 +38,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 
             if re.search(
                     self.PATTERN_EDIT_RESTAURANT_PATH, self.path) is not None:
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                self.send_get_response()
 
                 # Output form to edit existing restaurant based on id from URL
                 r_id = re.search(
@@ -68,10 +62,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                     restaurant_name = fields.get('restaurantName')[0]
                     addRestaurant(restaurant_name)
 
-                self.send_response(301)
-                self.send_header('Content-type', 'text/html')
-                self.send_header('Location', '/restaurants')
-                self.end_headers()
+                self.send_post_response()
 
                 return
 
@@ -87,14 +78,22 @@ class webserverHandler(BaseHTTPRequestHandler):
                         self.PATTERN_EDIT_RESTAURANT_PATH, self.path).group(1)
                     editRestaurant(r_id, r_name)
 
-                    self.send_response(301)
-                    self.send_header('Content-type', 'text/html')
-                    self.send_header('Location', '/restaurants')
-                    self.end_headers()
+                    self.send_post_response()
 
                     return
         except:
             pass
+
+    def send_get_response(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def send_post_response(self):
+        self.send_response(301)
+        self.send_header('Content-type', 'text/html')
+        self.send_header('Location', '/restaurants')
+        self.end_headers()
 
 
 def main():
