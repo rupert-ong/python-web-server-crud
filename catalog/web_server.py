@@ -11,6 +11,9 @@ from database_setup import Base, Restaurant
 class webserverHandler(BaseHTTPRequestHandler):
     """Determine what code to execute based on based on HTTP request sent to
     the server"""
+
+    PATTERN_EDIT_RESTAURANT_PATH = r'/restaurants/([0-9]+?)/edit'
+
     def do_GET(self):
         try:
             if self.path.endswith("/restaurants"):
@@ -37,14 +40,15 @@ class webserverHandler(BaseHTTPRequestHandler):
                 print output
                 return
 
-            if re.search(r'/restaurants/([0-9]+?)/edit', self.path) is not None:
+            if re.search(
+                    self.PATTERN_EDIT_RESTAURANT_PATH, self.path) is not None:
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
 
                 # Output form to edit existing restaurant based on id from URL
                 r_id = re.search(
-                    r'/restaurants/([0-9]+?)/edit', self.path).group(1)
+                    self.PATTERN_EDIT_RESTAURANT_PATH, self.path).group(1)
                 output = editRestaurantForm(r_id)
                 self.wfile.write(output)
                 print output
@@ -71,7 +75,8 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 return
 
-            if re.search(r'/restaurants/([0-9]+?)/edit', self.path) is not None:
+            if re.search(
+                    self.PATTERN_EDIT_RESTAURANT_PATH, self.path) is not None:
                 ctype, pdict = cgi.parse_header(
                     self.headers.getheader('content-type'))
 
@@ -79,7 +84,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                     fields = cgi.parse_multipart(self.rfile, pdict)
                     r_name = fields.get('restaurantName')[0]
                     r_id = re.search(
-                        r'/restaurants/([0-9]+?)/edit', self.path).group(1)
+                        self.PATTERN_EDIT_RESTAURANT_PATH, self.path).group(1)
                     editRestaurant(r_id, r_name)
 
                     self.send_response(301)
