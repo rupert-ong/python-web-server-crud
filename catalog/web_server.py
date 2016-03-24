@@ -22,7 +22,6 @@ class webserverHandler(BaseHTTPRequestHandler):
                 # Output all restaurants
                 restaurant_list = getAllRestaurants()
                 output = createHTMLPage(restaurant_list)
-
                 self.wfile.write(output)
                 print output
                 return
@@ -72,7 +71,6 @@ class webserverHandler(BaseHTTPRequestHandler):
                     addRestaurant(restaurant_name)
 
                 self.send_post_response()
-
                 return
 
             if re.search(
@@ -87,9 +85,21 @@ class webserverHandler(BaseHTTPRequestHandler):
                         self.PATTERN_EDIT_RESTAURANT_PATH, self.path).group(1)
                     editRestaurant(r_id, r_name)
 
-                    self.send_post_response()
+                self.send_post_response()
+                return
 
-                    return
+            if self.path.endswith("/delete"):
+                ctype, pdict = cgi.parse_header(
+                    self.headers.getheader('content-type'))
+
+                if ctype == 'multipart/form-data':
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                    r_id = fields.get('restaurantID')[0]
+                    deleteRestaurant(r_id)
+
+                self.send_post_response()
+                return
+
         except:
             pass
 
@@ -151,6 +161,19 @@ def editRestaurant(r_id, r_name):
     session = createDBSession()
     restaurant = session.query(Restaurant).get(r_id)
     restaurant.name = r_name
+    session.commit()
+
+
+def deleteRestaurant(r_id):
+    """Delete restaurant from database
+
+    Args:
+        r_id: Restaurant id from database
+
+    """
+    session = createDBSession()
+    restaurant = session.query(Restaurant).get(r_id)
+    session.delete(restaurant)
     session.commit()
 
 
