@@ -71,6 +71,23 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 return
 
+            if re.search(r'/restaurants/([0-9]+?)/edit', self.path) is not None:
+                ctype, pdict = cgi.parse_header(
+                    self.headers.getheader('content-type'))
+
+                if ctype == 'multipart/form-data':
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                    r_name = fields.get('restaurantName')[0]
+                    r_id = re.search(
+                        r'/restaurants/([0-9]+?)/edit', self.path).group(1)
+                    editRestaurant(r_id, r_name)
+
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/restaurants')
+                    self.end_headers()
+
+                    return
         except:
             pass
 
@@ -108,6 +125,19 @@ def addRestaurant(restaurant_name):
     session = createDBSession()
     restaurant = Restaurant(name=restaurant_name)
     session.add(restaurant)
+    session.commit()
+
+
+def editRestaurant(r_id, r_name):
+    """Edit existing restaurant information in database
+
+    Args:
+        r_id: Database ID of restaurant
+        r_name: New name for restaurant
+    """
+    session = createDBSession()
+    restaurant = session.query(Restaurant).get(r_id)
+    restaurant.name = r_name
     session.commit()
 
 
