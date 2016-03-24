@@ -48,6 +48,15 @@ class webserverHandler(BaseHTTPRequestHandler):
                 print output
                 return
 
+            if self.path.endswith("/delete"):
+                self.send_get_response()
+
+                r_id = self.path.split("/")[2]
+                output = deleteRestaurantForm(r_id)
+                self.wfile.write(output)
+                print output
+                return
+
         except IOError:
             self.send_error(404, "File not found at %s" % self.path)
 
@@ -156,7 +165,7 @@ def getAllRestaurants():
         output += "<li><h3 class='margin-b-0'>%s</h3>" % r.name
         output += "<small>"
         output += "<a href='/restaurants/%s/edit'>Edit</a> | " % r.id
-        output += "<a href='#'>Delete</a></small>"
+        output += "<a href='/restaurants/%s/delete'>Delete</a></small>" % r.id
         output += "</li>"
 
     output += "</ul><p><a href='/restaurants/new'>Create new restaurant</a></p>"
@@ -212,6 +221,30 @@ def editRestaurantForm(r_id):
                   "<input type='text' name='restaurantName'>"
                   "<input type='submit' value='Submit'></form>") % (
             restaurant.id, restaurant.name)
+
+    return output
+
+
+def deleteRestaurantForm(r_id):
+    """Create form to delete existing restaurant
+
+    Args:
+        r_id: id extracted from URL
+    """
+    session = createDBSession()
+    restaurant = session.query(Restaurant).get(r_id)
+
+    if restaurant is None:
+        output = ("<p>The restaurant you're looking for doesn't exist.<br>"
+                  "<a href='/restaurants'>Back to listings</a></p>")
+    else:
+        output = ("<form method='POST' enctype='multipart/form-data' "
+                  "action='/restaurants/%s/delete'>"
+                  "<h2>Delete %s restaurant</h2><p>Are you sure? "
+                  "<input type='hidden' name='restaurantID' value='%s'>"
+                  "<input type='submit' value='Delete'></p></form>"
+                  "<p><a href='/restaurants'>No, take me back to the listings"
+                  "</a></p>") % (restaurant.id, restaurant.name, restaurant.id)
 
     return output
 
