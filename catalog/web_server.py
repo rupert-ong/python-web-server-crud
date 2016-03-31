@@ -30,7 +30,8 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_get_response()
 
                 # Output form to create new restaurant
-                output = createNewRestaurantForm()
+                form = createNewRestaurantForm()
+                output = createHTMLPage(form)
                 self.wfile.write(output)
                 print output
                 return
@@ -42,7 +43,8 @@ class webserverHandler(BaseHTTPRequestHandler):
                 # Output form to edit existing restaurant based on id from URL
                 r_id = re.search(
                     self.PATTERN_EDIT_RESTAURANT_PATH, self.path).group(1)
-                output = editRestaurantForm(r_id)
+                form = editRestaurantForm(r_id)
+                output = createHTMLPage(form)
                 self.wfile.write(output)
                 print output
                 return
@@ -50,8 +52,10 @@ class webserverHandler(BaseHTTPRequestHandler):
             if self.path.endswith("/delete"):
                 self.send_get_response()
 
+                # Output form to confirm deletion
                 r_id = self.path.split("/")[2]
-                output = deleteRestaurantForm(r_id)
+                form = deleteRestaurantForm(r_id)
+                output = createHTMLPage(form)
                 self.wfile.write(output)
                 print output
                 return
@@ -198,7 +202,7 @@ def createHTMLPage(content):
         content: String of HTMl elements
 
     """
-    output = "<!doctype html><html><head>"
+    output = "<!doctype html><html><head><title>My Restaurant Listings</title>"
     output += "<style>.margin-b-0 { margin-bottom: 0; }</style>"
     output += "</head><body>"
     output += content
